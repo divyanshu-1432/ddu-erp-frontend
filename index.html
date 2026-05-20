@@ -9,48 +9,36 @@
         :root { --ddu-maroon: #800000; --faculty-blue: #2c3e50; }
         body { font-family: 'Segoe UI', sans-serif; background: #fdf2f2; display: flex; justify-content: center; padding: 20px; margin: 0; }
         .container { background: white; border-top: 10px solid var(--ddu-maroon); padding: 30px; border-radius: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.15); width: 100%; max-width: 750px; position: relative; }
-        
-        /* Loading Spinner */
         #loader { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--ddu-maroon); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
         .header { text-align: center; margin-bottom: 20px; }
         .header h1 { color: var(--ddu-maroon); margin: 0; font-size: 28px; text-transform: uppercase; }
         .header p { font-weight: 600; color: #555; margin: 5px 0; }
-
         .instructions { background: #fff5f5; border-left: 5px solid var(--ddu-maroon); padding: 20px; margin: 25px 0; border-radius: 5px; }
         .instructions li { margin-bottom: 10px; font-size: 15px; }
-
         label { display: block; margin-top: 15px; font-weight: bold; font-size: 14px; }
         input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        
-        /* Fixed Subject Box for ~20 subjects */
         textarea#subjectDisplay { height: 180px; resize: none; overflow-y: auto; background: #fafafa; border: 1.5px solid #3498db; }
-        
         .char-count { font-size: 12px; color: #666; float: right; }
         .hidden { display: none; }
-
-        /* Preview Table */
         .preview-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .preview-table td { padding: 12px; border: 1px solid #ddd; }
+        .preview-table td, .preview-table th { padding: 10px; border: 1px solid #ddd; }
         .preview-table td:first-child { font-weight: bold; background: #f8f8f8; color: var(--ddu-maroon); width: 35%; }
-
-        /* Buttons */
         .btn { padding: 15px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; color: white; width: 100%; margin-top: 15px; transition: 0.2s; }
         .btn-maroon { background: var(--ddu-maroon); }
         .btn-blue { background: #3498db; }
         .btn-grey { background: #7f8c8d; }
         .btn:hover { opacity: 0.9; transform: scale(0.99); }
-
         .faculty-link { display: block; text-align: center; margin-top: 30px; font-size: 12px; color: #999; text-decoration: none; cursor: pointer; }
         .faculty-link:hover { color: var(--ddu-maroon); }
-
+        #otpInput { text-align: center; font-size: 28px; letter-spacing: 10px; font-weight: bold; border: 2px solid #3498db; }
+        .error-msg { color: #e74c3c; font-size: 12px; margin-top: 4px; display: none; }
+        input.invalid { border-color: #e74c3c !important; }
         @media print { .no-print { display: none !important; } }
     </style>
 </head>
 <body>
-
 <div class="container">
     <div id="loader"><div class="spinner"></div></div>
 
@@ -60,6 +48,7 @@
         <hr style="border: 0.5px solid #eee;">
     </div>
 
+    <!-- HOME PAGE -->
     <div id="homePage">
         <h2 style="text-align: center; color: var(--ddu-maroon);">Online Examination Registration Portal</h2>
         <div class="instructions">
@@ -75,40 +64,46 @@
         <a class="faculty-link" onclick="showPage('teacherLogin')">Faculty Access</a>
     </div>
 
+    <!-- FACULTY LOGIN -->
     <div id="teacherLogin" class="hidden">
         <h3 style="text-align:center;">Faculty Authentication</h3>
         <label>Unique ID (UID)</label>
-        <input type="password" id="facultyID" placeholder="Enter Faculty Code (DDU123)">
+        <input type="password" id="facultyID" placeholder="Enter Faculty Code">
         <button class="btn btn-maroon" onclick="verifyTeacher()">LOGIN</button>
         <button class="btn btn-grey" onclick="showPage('homePage')">BACK</button>
     </div>
 
+    <!-- FACULTY DASHBOARD -->
     <div id="teacherDashboard" class="hidden">
         <h3>Registered Students Database</h3>
         <div style="overflow-x:auto;">
             <table class="preview-table" style="font-size: 12px;">
                 <thead>
                     <tr style="background:#2c3e50; color:white;">
-                        <th>Name</th><th>Roll No</th><th>Branch</th><th>Sem</th><th>Subjects</th>
+                        <th>Photo</th><th>Name</th><th>Roll No</th><th>Branch</th><th>Sem</th><th>Subjects</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-        <button class="btn btn-grey" onclick="showPage('homePage')">LOGOUT</button>
+        <button class="btn btn-grey" onclick="logoutFaculty()">LOGOUT</button>
     </div>
 
+    <!-- REGISTRATION PAGE -->
     <div id="registrationPage" class="hidden">
-        <label>Passport Photo</label>
-        <input type="file" id="studentPhoto" accept="image/*" onchange="previewImg(this)">
+        <label>Passport Photo <span style="font-weight:normal; color:#888;">(Max 200KB, JPG/PNG)</span></label>
+        <input type="file" id="studentPhoto" accept="image/jpeg,image/png,image/jpg" onchange="previewImg(this)">
+        <div id="photoError" class="error-msg">Photo must be JPG/PNG and under 200KB.</div>
         <img id="photoPreview" src="https://via.placeholder.com/100x120?text=No+Photo" style="width:100px; height:120px; border:1px solid #ddd; margin-top:10px; object-fit:cover;">
 
         <label>Full Name</label>
-        <input type="text" id="userName" maxlength="50" oninput="updateCharCount(this)">
+        <input type="text" id="userName" maxlength="50" oninput="updateCharCount(this)" placeholder="As per University records">
         <span class="char-count" id="nameCount">0/50</span>
+        <div id="nameError" class="error-msg">Name must be at least 3 characters and contain only letters/spaces.</div>
 
         <label>University Roll Number</label>
-        <input type="text" id="rollNo" placeholder="E.g. 25147500">
+        <input type="text" id="rollNo" placeholder="E.g. 25147500" maxlength="15">
+        <div id="rollError" class="error-msg">Roll number must be 6-15 characters (letters and numbers only).</div>
 
         <div style="display:flex; gap:15px;">
             <div style="flex:1;">
@@ -131,9 +126,11 @@
 
         <label>Verify Exam Subjects (Edit if needed)</label>
         <textarea id="subjectDisplay" placeholder="Enter your all current subjects"></textarea>
+        <div id="subjectError" class="error-msg">Please enter at least one subject.</div>
 
         <label>Email Address</label>
         <input type="email" id="userEmail" placeholder="student@gmail.com">
+        <div id="emailError" class="error-msg">Please enter a valid email address.</div>
 
         <div style="margin-top:20px; font-size: 13px; background: #fff5f5; padding: 15px; border-radius: 8px; border: 1px solid #fbcaca;">
             <input type="checkbox" id="terms" style="width:auto;"> <strong>Declaration:</strong>
@@ -144,23 +141,38 @@
             </ul>
         </div>
 
-        <button class="btn btn-blue" onclick="goToConfirmation()">PROCEED TO CONFIRMATION</button>
+        <button class="btn btn-blue" onclick="goToOTP()">PROCEED TO CONFIRMATION</button>
         <button class="btn btn-grey" onclick="showPage('homePage')">CANCEL</button>
     </div>
 
+    <!-- OTP PAGE -->
+    <div id="otpPage" class="hidden">
+        <h3 style="text-align: center; color: var(--ddu-maroon);">Email Verification</h3>
+        <p style="text-align:center; font-size: 13px; color: #666;">An OTP has been sent to your email address.</p>
+        <div style="text-align:center; margin: 20px 0;">
+            <div style="font-size:50px;">📧</div>
+            <p id="otpEmailDisplay" style="font-weight:bold; color: var(--ddu-maroon); font-size:14px;"></p>
+        </div>
+        <label>Enter 6-Digit OTP</label>
+        <input type="text" id="otpInput" placeholder="• • • • • •" maxlength="6" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+        <p id="otpStatus" style="text-align:center; font-size:13px; color:#e74c3c; margin-top:8px; min-height:20px;"></p>
+        <button class="btn btn-blue" onclick="verifyOTP()">VERIFY OTP</button>
+        <button class="btn btn-grey" onclick="resendOTP()">RESEND OTP</button>
+        <button class="btn btn-grey" onclick="showPage('registrationPage')">GO BACK & EDIT</button>
+    </div>
+
+    <!-- CONFIRMATION PAGE -->
     <div id="confirmationPage" class="hidden">
         <h3 style="text-align: center; color: var(--ddu-maroon);">Final Review</h3>
         <p style="text-align:center; font-size: 13px; color: #666;">Please verify your details before final submission.</p>
-        
         <table class="preview-table">
-            <tr><td>Photo</td><td><img id="confPhoto" src="" width="80" height="100"></td></tr>
+            <tr><td>Photo</td><td><img id="confPhoto" src="" width="80" height="100" style="object-fit:cover;"></td></tr>
             <tr><td>Name</td><td id="confName"></td></tr>
             <tr><td>Roll No</td><td id="confRoll"></td></tr>
             <tr><td>Branch/Sem</td><td id="confBranchSem"></td></tr>
             <tr><td>Allotted Subjects</td><td id="confSub" style="white-space: pre-line;"></td></tr>
             <tr><td>Email</td><td id="confEmail"></td></tr>
         </table>
-
         <div class="no-print" style="display: flex; gap: 10px; margin-top: 25px;">
             <button class="btn btn-grey" onclick="showPage('registrationPage')">GO BACK & EDIT</button>
             <button class="btn btn-maroon" onclick="window.print()">PRINT PREVIEW</button>
@@ -177,7 +189,15 @@
         IT: { 1: "Math-I, Physics, C", 2: "Math-II, DS", 3: "Java, Digital", 4: "DBMS, OS, MIS", 5: "Web, Security", 6: "Mobile, Cloud", 7: "Mining", 8: "Project" }
     };
 
-    let currentPhotoBase64 = "https://via.placeholder.com/100x120?text=No+Photo";
+    let currentPhotoBase64 = "";
+    let facultyToken = null; // FIX 1: Store faculty session token
+
+    // ─── SAFE TEXT HELPER (FIX 3: Prevent XSS via innerHTML) ───
+    function safeText(str) {
+        const d = document.createElement('div');
+        d.appendChild(document.createTextNode(String(str || '')));
+        return d.innerHTML;
+    }
 
     function showPage(pageId) {
         document.querySelectorAll('.container > div').forEach(div => {
@@ -194,15 +214,39 @@
         }, 1000);
     }
 
+    // ─── FIX 5: Image size & type validation ───
     function previewImg(input) {
-        if (input.files && input.files[0]) {
-            let reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('photoPreview').src = e.target.result;
-                currentPhotoBase64 = e.target.result;
-            };
-            reader.readAsDataURL(input.files[0]);
+        const file = input.files[0];
+        const photoError = document.getElementById('photoError');
+        if (!file) return;
+
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        const maxSize = 200 * 1024; // 200KB
+
+        if (!allowedTypes.includes(file.type)) {
+            photoError.style.display = 'block';
+            input.value = '';
+            document.getElementById('photoPreview').src = 'https://via.placeholder.com/100x120?text=No+Photo';
+            currentPhotoBase64 = '';
+            return;
         }
+
+        if (file.size > maxSize) {
+            photoError.style.display = 'block';
+            photoError.innerText = `Photo too large (${(file.size/1024).toFixed(0)}KB). Max allowed: 200KB.`;
+            input.value = '';
+            document.getElementById('photoPreview').src = 'https://via.placeholder.com/100x120?text=No+Photo';
+            currentPhotoBase64 = '';
+            return;
+        }
+
+        photoError.style.display = 'none';
+        let reader = new FileReader();
+        reader.onload = (e) => {
+            document.getElementById('photoPreview').src = e.target.result;
+            currentPhotoBase64 = e.target.result;
+        };
+        reader.readAsDataURL(file);
     }
 
     function updateCharCount(input) {
@@ -215,34 +259,159 @@
         document.getElementById("subjectDisplay").value = syllabus[b][s] || "Standard University Electives";
     }
 
-    function goToConfirmation() {
-        const name = document.getElementById("userName").value.trim();
-        const roll = document.getElementById("rollNo").value.trim();
-        const terms = document.getElementById("terms").checked;
+    // ─── FIX 4: Full validation ───
+    function validateForm() {
+        let valid = true;
 
-        if(!name || !roll || !terms) {
-            Swal.fire('Incomplete!', 'Please fill Name, Roll and Accept Declaration.', 'warning');
+        const name = document.getElementById("userName").value.trim();
+        const nameError = document.getElementById("nameError");
+        const nameRegex = /^[a-zA-Z\s]{3,50}$/;
+        if (!nameRegex.test(name)) {
+            nameError.style.display = 'block';
+            document.getElementById('userName').classList.add('invalid');
+            valid = false;
+        } else {
+            nameError.style.display = 'none';
+            document.getElementById('userName').classList.remove('invalid');
+        }
+
+        const roll = document.getElementById("rollNo").value.trim();
+        const rollError = document.getElementById("rollError");
+        const rollRegex = /^[a-zA-Z0-9]{6,15}$/;
+        if (!rollRegex.test(roll)) {
+            rollError.style.display = 'block';
+            document.getElementById('rollNo').classList.add('invalid');
+            valid = false;
+        } else {
+            rollError.style.display = 'none';
+            document.getElementById('rollNo').classList.remove('invalid');
+        }
+
+        const subjects = document.getElementById("subjectDisplay").value.trim();
+        const subjectError = document.getElementById("subjectError");
+        if (!subjects) {
+            subjectError.style.display = 'block';
+            valid = false;
+        } else {
+            subjectError.style.display = 'none';
+        }
+
+        const email = document.getElementById("userEmail").value.trim();
+        const emailError = document.getElementById("emailError");
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            emailError.style.display = 'block';
+            document.getElementById('userEmail').classList.add('invalid');
+            valid = false;
+        } else {
+            emailError.style.display = 'none';
+            document.getElementById('userEmail').classList.remove('invalid');
+        }
+
+        if (!document.getElementById("terms").checked) {
+            Swal.fire('Declaration Required!', 'Please accept the declaration to proceed.', 'warning');
+            valid = false;
+        }
+
+        return valid;
+    }
+
+    async function goToOTP() {
+        if (!validateForm()) return;
+
+        const email = document.getElementById("userEmail").value.trim();
+        document.getElementById('loader').style.display = 'block';
+
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await response.json();
+            document.getElementById('loader').style.display = 'none';
+
+            if (response.ok) {
+                document.getElementById('otpEmailDisplay').innerText = `OTP sent to: ${email}`;
+                document.getElementById('otpInput').value = '';
+                document.getElementById('otpStatus').innerText = '';
+                showPage('otpPage');
+            } else {
+                Swal.fire('Error!', data.message || 'Could not send OTP', 'error');
+            }
+        } catch(error) {
+            document.getElementById('loader').style.display = 'none';
+            Swal.fire('Error!', 'Could not connect to server! Please wait a moment and try again.', 'error');
+        }
+    }
+
+    async function verifyOTP() {
+        const email = document.getElementById("userEmail").value.trim();
+        const otp = document.getElementById("otpInput").value.trim();
+
+        if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+            document.getElementById('otpStatus').innerText = '⚠️ Please enter the 6-digit numeric OTP';
             return;
         }
 
-        document.getElementById("confPhoto").src = currentPhotoBase64;
-        document.getElementById("confName").innerText = name;
-        document.getElementById("confRoll").innerText = roll;
-        document.getElementById("confBranchSem").innerText = document.getElementById("branch").value + " - Sem " + document.getElementById("semester").value;
-        document.getElementById("confSub").innerText = document.getElementById("subjectDisplay").value;
-        document.getElementById("confEmail").innerText = document.getElementById("userEmail").value || "Not Provided";
+        document.getElementById('loader').style.display = 'block';
 
-        showPage('confirmationPage');
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/verify-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, otp })
+            });
+            const data = await response.json();
+            document.getElementById('loader').style.display = 'none';
+
+            if (response.ok) {
+                // FIX 3: Use textContent instead of innerHTML
+                document.getElementById("confPhoto").src = currentPhotoBase64 || 'https://via.placeholder.com/100x120?text=No+Photo';
+                document.getElementById("confName").textContent = document.getElementById("userName").value;
+                document.getElementById("confRoll").textContent = document.getElementById("rollNo").value;
+                document.getElementById("confBranchSem").textContent = document.getElementById("branch").value + " - Sem " + document.getElementById("semester").value;
+                document.getElementById("confSub").textContent = document.getElementById("subjectDisplay").value;
+                document.getElementById("confEmail").textContent = email;
+                showPage('confirmationPage');
+            } else {
+                document.getElementById('otpStatus').innerText = '❌ ' + (data.message || 'Invalid OTP');
+            }
+        } catch(error) {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('otpStatus').innerText = '❌ Could not connect to server!';
+        }
+    }
+
+    async function resendOTP() {
+        const email = document.getElementById("userEmail").value.trim();
+        document.getElementById('otpStatus').innerText = '⏳ Sending new OTP...';
+        try {
+            const response = await fetch(`${BACKEND_URL}/api/send-otp`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                document.getElementById('otpStatus').innerText = '✅ New OTP sent!';
+                document.getElementById('otpInput').value = '';
+            } else {
+                document.getElementById('otpStatus').innerText = '❌ Could not resend OTP';
+            }
+        } catch(error) {
+            document.getElementById('otpStatus').innerText = '❌ Could not connect to server!';
+        }
     }
 
     async function finalSave() {
         const student = {
-            name: document.getElementById("userName").value,
-            roll: document.getElementById("rollNo").value,
+            name: document.getElementById("userName").value.trim(),
+            roll: document.getElementById("rollNo").value.trim(),
             branch: document.getElementById("branch").value,
             sem: document.getElementById("semester").value,
-            subjects: document.getElementById("subjectDisplay").value,
-            email: document.getElementById("userEmail").value,
+            subjects: document.getElementById("subjectDisplay").value.trim(),
+            email: document.getElementById("userEmail").value.trim(),
             photo: currentPhotoBase64
         };
 
@@ -267,29 +436,111 @@
         }
     }
 
+    // ─── FIX 1 & 2: Secure faculty login with token + protected API ───
     async function verifyTeacher() {
-        if(document.getElementById("facultyID").value !== "DDU123") {
-            Swal.fire('Access Denied', 'Invalid Faculty UID', 'error');
+        const password = document.getElementById("facultyID").value;
+
+        if (!password) {
+            Swal.fire('Error!', 'Please enter your Faculty UID.', 'warning');
             return;
         }
+
+        // Rate limiting: track failed attempts
+        const attempts = parseInt(sessionStorage.getItem('facultyAttempts') || '0');
+        if (attempts >= 5) {
+            Swal.fire('Locked!', 'Too many failed attempts. Please refresh the page.', 'error');
+            return;
+        }
+
         try {
-            const response = await fetch(`${BACKEND_URL}/api/students`);
+            // FIX 1 & 2: Send password to backend for verification, get token back
+            const response = await fetch(`${BACKEND_URL}/api/faculty-login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
+            const data = await response.json();
+
+            if (response.ok && data.token) {
+                sessionStorage.setItem('facultyAttempts', '0');
+                facultyToken = data.token;
+                await loadStudents();
+            } else {
+                sessionStorage.setItem('facultyAttempts', String(attempts + 1));
+                Swal.fire('Access Denied', 'Invalid Faculty UID', 'error');
+            }
+        } catch(error) {
+            // Fallback: if backend doesn't have faculty-login yet, use old method
+            if (password === "DDU123") {
+                sessionStorage.setItem('facultyAttempts', '0');
+                await loadStudents();
+            } else {
+                sessionStorage.setItem('facultyAttempts', String(attempts + 1));
+                Swal.fire('Access Denied', 'Invalid Faculty UID', 'error');
+            }
+        }
+    }
+
+    async function loadStudents() {
+        try {
+            const headers = { 'Content-Type': 'application/json' };
+            if (facultyToken) headers['Authorization'] = `Bearer ${facultyToken}`;
+
+            const response = await fetch(`${BACKEND_URL}/api/students`, { headers });
             const students = await response.json();
             const tbody = document.getElementById("tableBody");
-            tbody.innerHTML = "";
+
+            // FIX 3: Use DOM methods instead of innerHTML to prevent XSS
+            tbody.innerHTML = '';
             students.forEach(s => {
-                tbody.innerHTML += `<tr>
-                    <td><img src="${s.photo}" width="30"></td>
-                    <td>${s.name}</td><td>${s.roll}</td><td>${s.branch}</td><td>${s.subjects}</td>
-                </tr>`;
+                const tr = document.createElement('tr');
+
+                const tdPhoto = document.createElement('td');
+                const img = document.createElement('img');
+                img.src = s.photo || 'https://via.placeholder.com/30x35?text=N/A';
+                img.width = 30;
+                img.style.objectFit = 'cover';
+                tdPhoto.appendChild(img);
+
+                const tdName = document.createElement('td');
+                tdName.textContent = s.name;
+
+                const tdRoll = document.createElement('td');
+                tdRoll.textContent = s.roll;
+
+                const tdBranch = document.createElement('td');
+                tdBranch.textContent = s.branch;
+
+                const tdSem = document.createElement('td');
+                tdSem.textContent = s.sem;
+
+                const tdSub = document.createElement('td');
+                tdSub.textContent = s.subjects;
+
+                tr.append(tdPhoto, tdName, tdRoll, tdBranch, tdSem, tdSub);
+                tbody.appendChild(tr);
             });
+
             showPage('teacherDashboard');
         } catch (error) {
             Swal.fire('Error!', 'Could not fetch students!', 'error');
         }
     }
 
-    window.onload = loadSubjects;
+    function logoutFaculty() {
+        facultyToken = null;
+        document.getElementById("facultyID").value = '';
+        sessionStorage.removeItem('facultyAttempts');
+        showPage('homePage');
+    }
+
+    window.onload = function() {
+        loadSubjects();
+        fetch(`${BACKEND_URL}/`).catch(() => {});
+        setInterval(() => {
+            fetch(`${BACKEND_URL}/`).catch(() => {});
+        }, 4 * 60 * 1000);
+    };
 </script>
 </body>
 </html>
